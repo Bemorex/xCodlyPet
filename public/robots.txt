@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Páginas importantes
+Allow: /welcome
+Allow: /pets  
+Allow: /pets
+Allow: /reports
+
+# Bloquear archivos innecesarios
+Disallow: /assets/
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /*.map$
+
+# Sitemaps
+Sitemap: https://codly.pet/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1

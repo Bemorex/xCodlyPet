@@ -1,0 +1,33 @@
+<div class="breed-selector-sheet">
+  <div class="sheet-header">
+    <h6>Selecciona la raza</h6>
+    <button class="border circle" (click)="close()">
+      <i>close</i>
+    </button>
+  </div>
+
+  <div class="search-section">
+    <mat-form-field class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput [(ngModel)]="searchQuery" placeholder="Buscar raza..." />
+    </mat-form-field>
+  </div>
+
+  <div class="breeds-list">
+    @for (breed of filteredBreeds(); track breed.id) {
+    <div class="breed-item" (click)="selectBreed(breed)">
+      <img [src]="breed.image" [alt]="breed.nameEs" class="breed-image" />
+      <div class="breed-info">
+        <strong>{{ breed.nameEs }}</strong>
+        <span>{{ breed.characteristics.slice(0, 2).join(' • ') }}</span>
+      </div>
+      <mat-icon>chevron_right</mat-icon>
+    </div>
+    } @if (filteredBreeds().length === 0) {
+    <div class="no-results">
+      <mat-icon>search_off</mat-icon>
+      <p>No se encontraron razas</p>
+    </div>
+    }
+  </div>
+</div>

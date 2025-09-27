@@ -1,0 +1,111 @@
+<section class="layout">
+  <x-navbar xTitle="Mascotas" backUrl="/pets" />
+
+  <main class="responsive list-pets">
+    <mat-chip-listbox class="mat-mdc-chip-set-stacked" aria-label="Filtros de mascotas">
+      @for (filter of filterOptions; track filter.value) {
+      <mat-chip-option
+        [selected]="selectedFilter() === filter.value"
+        (click)="setFilter(filter.value)"
+      >
+        <span>{{ filter.label }}</span>
+      </mat-chip-option>
+      }
+    </mat-chip-listbox>
+
+    @if (filteredPets().length > 0) {
+    <div class="pets-grid">
+      @for (pet of filteredPets(); track pet.xId) {
+      <article class="pet-card border round">
+        <div class="pet-image" [routerLink]="['/pets', pet.xId]">
+          <img [src]="getPetMainImage(pet)" [alt]="pet.xName" class="responsive" />
+
+          <div class="status-overlay">
+            <span class="status-badge" [attr.data-status]="getStatusInfo(pet.xCurrentStatus).color">
+              {{ getStatusInfo(pet.xCurrentStatus).label }}
+            </span>
+          </div>
+
+          @if (pet.hasActiveReport) {
+          <div class="report-badge">
+            <mat-icon>report</mat-icon>
+            <span>Reportado</span>
+          </div>
+          }
+        </div>
+
+        <div class="pet-info padding">
+          <div class="pet-header">
+            <h5 class="no-margin">{{ pet.xName }}</h5>
+            <p class="pet-type">
+              {{ getPetTypeLabel(pet.xType) }} • {{ getBreedLabel(pet.xBreed) }}
+            </p>
+          </div>
+
+          <div class="pet-details">
+            <div class="detail-item">
+              <i>cake</i>
+              <span>{{ formatAge(pet.xBirthDate) }} ({{ getAgeStage(pet.xBirthDate) }})</span>
+            </div>
+            <div class="detail-item">
+              <i>palette</i>
+              <span>{{ pet.xColorPrimary }}</span>
+            </div>
+          </div>
+
+          <nav class="pet-actions">
+            @if (selectedFilter() === 'my-pets') {
+            <button class="fill" [routerLink]="['/pets', pet.xId]">Ver</button>
+            <button class="fill" [routerLink]="['/pets', pet.xId, 'edit']">Editar</button>
+
+            @if (pet.xCurrentStatus === 1) {
+            <button class="error-container" (click)="reportPetAsLost(pet)">Reportar</button>
+            } @if (pet.hasActiveReport) {
+            <button class="secondary-container" (click)="openReportDetail(pet)">Ver Reporte</button>
+            } } @else if (selectedFilter() === 'lost' || selectedFilter() === 'found') {
+            <button class="fill" [routerLink]="['/pets', pet.xId]">Ver Mascota</button>
+
+            @if (pet.hasActiveReport) {
+            <button class="primary" (click)="openReportDetail(pet)">
+              <i>info</i>
+              <span>Ver Reporte</span>
+            </button>
+            } } @else if (selectedFilter() === 'adoption') {
+            <button class="fill" [routerLink]="['/pets', pet.xId]">Ver Detalle</button>
+
+            @if (!isOwner(pet)) {
+            <button class="primary" (click)="showAdoptionInterest(pet)">
+              <i>favorite</i>
+              <span>Me Interesa</span>
+            </button>
+            } }
+          </nav>
+        </div>
+      </article>
+      }
+    </div>
+    } @else {
+    <div class="empty-state">
+      <div class="empty-content">
+        <mat-icon fontIcon="pets"></mat-icon>
+
+        <h5>
+          @if (selectedFilter() === 'my-pets') { ¡Registra tu primera mascota! } @else if
+          (selectedFilter() === 'lost') { No hay mascotas perdidas en este momento } @else if
+          (selectedFilter() === 'found') { No hay mascotas encontradas registradas } @else if
+          (selectedFilter() === 'adoption') { No hay mascotas en adopción actualmente }
+        </h5>
+
+        <p>
+          @if (selectedFilter() === 'my-pets') { Aún no has registrado ninguna mascota. Comienza
+          registrando a tu compañero peludo. } @else { Intenta con otro filtro o vuelve más tarde. }
+        </p>
+      </div>
+    </div>
+    } @if (selectedFilter() === 'my-pets') {
+    <button class="btn-float-fab square round extra" routerLink="/pets/register">
+      <i>add</i>
+    </button>
+    }
+  </main>
+</section>

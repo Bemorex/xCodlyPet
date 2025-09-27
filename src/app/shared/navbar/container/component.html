@@ -1,0 +1,85 @@
+<header class="fixed">
+  <nav>
+    <button class="circle transparent" (click)="goBack()" type="button">
+      <i>arrow_back</i>
+    </button>
+    <div class="max"></div>
+    @if (showPwaBanner()) {
+    <button class="tertiary no-margin" (click)="handlePwaAction()" type="button">
+      @if (isUpdateAvailable()) {
+      <span>Actualizar</span>
+      } @else {
+      <span>Instalar</span>
+      }
+    </button>
+    }
+
+    <button class="circle transparent" (click)="authService.signOut()" type="button">
+      <i>exit_to_app</i>
+    </button>
+    <button class="circle transparent" type="button">
+      @if (user()?.photoURL) {
+      <img [src]="user()?.photoURL" class="responsive" [alt]="user()?.displayName || 'Usuario'" />
+      }
+    </button>
+  </nav>
+  <div class="small-padding">
+    <div class="title">
+      <h5>{{ xTitle() }}</h5>
+      @if (xDescription()) {
+      <p>{{ xDescription() }}</p>
+      }
+    </div>
+
+    <div class="actions">
+      @if(xActions()){
+      <ng-container *ngTemplateOutlet="xActions()" />
+      }
+    </div>
+  </div>
+</header>
+
+<nav class="left max l">
+  <header class="fixed">
+    <nav>
+      <img [src]="logo()" height="60px" />
+    </nav>
+  </header>
+
+  @for (item of menuItems(); track item.label) { @if (item.dividerAfter) {
+  <a [routerLink]="item.router" routerLinkActive="active">
+    <i>{{ item.icon }}</i>
+    <div>{{ item.label }}</div>
+  </a>
+  <div class="divider"></div>
+  } @else {
+  <a [routerLink]="item.router" routerLinkActive="active">
+    <i>{{ item.icon }}</i>
+    <div>{{ item.label }}</div>
+  </a>
+  } }
+</nav>
+
+<nav class="left m">
+  <header class="fixed">
+    <img [src]="logo()" height="90px" />
+  </header>
+
+  @for (item of primaryItems(); track item.label) {
+  <a [routerLink]="item.router" routerLinkActive="active">
+    <i>{{ item.icon }}</i>
+    <div>{{ item.label }}</div>
+  </a>
+  }
+</nav>
+
+@if(xSmall()) {
+<nav class="bottom s">
+  @for (item of primaryItems(); track item.label) {
+  <a [routerLink]="item.router" routerLinkActive="active">
+    <i>{{ item.icon }}</i>
+    <span>{{ item.label }}</span>
+  </a>
+  }
+</nav>
+}

@@ -1,0 +1,350 @@
+<section class="layout">
+  <form [formGroup]="petForm" (ngSubmit)="onSubmit()">
+    <x-navbar xTitle="Registrar" backUrl="/pets" [xActions]="xActions" />
+    <ng-template #xActions>
+      @if (uploadProgress() > 0) {
+      <span class="progress-percent">{{ uploadProgress() }}%</span>
+      }
+      <button
+        type="submit"
+        [disabled]="
+          petForm.invalid || selectedColors().length === 0 || !primaryColor() || isLoading()
+        "
+      >
+        @if (isLoading()) { Guardando... } @else { Guardar }
+      </button>
+    </ng-template>
+    <main class="pet-registration">
+      <div class="hero-section">
+        <div class="hero-content">
+          <mat-icon fontIcon="pets"></mat-icon>
+          <h1 class="hero-title">¡Registra a tu mascota!</h1>
+          <p class="hero-subtitle">Completa su información para tenerla siempre disponible</p>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="input-group">
+          <h6 class="field-label">¿Cómo se llama?</h6>
+          <mat-form-field class="mat-field">
+            <input matInput formControlName="xName" placeholder="Ej: Max, Luna, Rocky" />
+            <mat-error>{{ getErrorMessage('xName') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="input-group">
+          <h6 class="field-label">¿Es perro o gato?</h6>
+          <div class="pet-type-selector">
+            @for (type of petTypes; track type.value) {
+            <div
+              class="pet-type-card"
+              [class.selected]="petForm.get('xType')?.value === type.value"
+              (click)="selectPetType(type.value)"
+            >
+              <div class="card-image-container">
+                <img [src]="type.image" [alt]="type.label" class="pet-image" />
+                <div class="selection-overlay">
+                  <mat-icon class="check-icon">check_circle</mat-icon>
+                </div>
+              </div>
+              <div class="card-content">
+                <span class="pet-label">{{ type.label }}</span>
+              </div>
+            </div>
+            }
+          </div>
+          @if (petForm.get('xType')?.invalid && petForm.get('xType')?.touched) {
+          <div class="error-message">{{ getErrorMessage('xType') }}</div>
+          }
+        </div>
+
+        @if (petForm.get('xType')?.value) {
+        <div class="input-group">
+          <h6 class="field-label">¿Qué raza?</h6>
+          <button
+            type="button"
+            mat-stroked-button
+            class="breed-selector-btn"
+            (click)="openBreedSelector()"
+          >
+            @if (selectedBreedInfo(); as breedInfo) {
+            <span>{{ breedInfo.nameEs }}</span>
+            } @else {
+            <span>Seleccionar raza</span>
+            }
+            <mat-icon>expand_more</mat-icon>
+          </button>
+          @if (petForm.get('xBreed')?.invalid && petForm.get('xBreed')?.touched) {
+          <div class="error-message">{{ getErrorMessage('xBreed') }}</div>
+          } @if (selectedBreedInfo(); as breedInfo) {
+          <div class="selected-breed-info">
+            <img [src]="breedInfo.image" [alt]="breedInfo.nameEs" class="breed-preview-image" />
+            <div class="breed-details">
+              <h6>{{ breedInfo.nameEs }}</h6>
+              <div class="breed-characteristics">
+                @for (characteristic of breedInfo.characteristics; track characteristic) {
+                <span class="characteristic-chip">{{ characteristic }}</span>
+                }
+              </div>
+              <div class="breed-temperament">
+                <strong>Temperamento:</strong> {{ breedInfo.temperament.join(', ') }}
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+        }
+
+        <div class="input-group">
+          <h6 class="field-label">¿Cuándo nació?</h6>
+          <div class="birth-date-container">
+            <mat-form-field class="mat-field">
+              <input
+                matInput
+                [matDatepicker]="birthDatePicker"
+                formControlName="xBirthDate"
+                placeholder="Selecciona la fecha"
+              />
+              <mat-datepicker-toggle matSuffix [for]="birthDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker touchUi #birthDatePicker startView="multi-year"></mat-datepicker>
+            </mat-form-field>
+            @if (petForm.get('xBirthDate')?.value; as birthDate) {
+            <div class="age-display">
+              <div class="age-info">
+                <span class="age-number"
+                  >{{ calculateAgeFromBirthDate(petForm.get('xBirthDate')?.value) }} años
+                </span>
+                <span class="age-stage"> - {{ getAgeStage(birthDate) }}</span>
+              </div>
+            </div>
+            }
+          </div>
+          @if (petForm.get('xBirthDate')?.invalid && petForm.get('xBirthDate')?.touched) {
+          <div class="error-message">{{ getErrorMessage('xBirthDate') }}</div>
+          }
+        </div>
+
+        <div class="input-group">
+          <h6 class="field-label">Sexo</h6>
+          <div class="gender-selector">
+            @for (gender of genders; track gender.value) {
+            <div
+              class="gender-card"
+              [class.selected]="petForm.get('xGender')?.value === gender.value"
+              (click)="selectGender(gender.value)"
+            >
+              <div class="gender-icon">
+                <mat-icon [fontIcon]="gender.icon"></mat-icon>
+              </div>
+              <span class="gender-label">{{ gender.label }}</span>
+            </div>
+            }
+          </div>
+          @if (petForm.get('xGender')?.invalid && petForm.get('xGender')?.touched) {
+          <div class="error-message">{{ getErrorMessage('xGender') }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Apariencia</h2>
+        </div>
+        <div class="input-group">
+          <h6 class="field-label">Tipo de pelo</h6>
+          <mat-form-field class="mat-field">
+            <mat-select formControlName="xFurType" placeholder="Selecciona el tipo">
+              @for (furType of furTypes; track furType.value) {
+              <mat-option [value]="furType.value">
+                <div class="fur-type-option">
+                  <strong>{{ furType.label }}</strong>
+                  <span class="fur-description">{{ furType.description }}</span>
+                </div>
+              </mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ getErrorMessage('xFurType') }}</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="input-group">
+          <h6 class="field-label">¿Qué colores tiene?</h6>
+          <div class="color-picker-container">
+            <div class="color-group">
+              <span class="color-group-label">Comunes</span>
+              <div class="color-options">
+                @for (color of getCommonColors(); track color.id) {
+                <button
+                  type="button"
+                  class="color-option"
+                  [class.selected]="isColorSelected(color.id)"
+                  [class.is-primary]="isPrimaryColor(color.id)"
+                  (click)="selectColor(color)"
+                  [attr.aria-label]="color.name"
+                >
+                  <span class="color-circle" [style.background-color]="color.hexCode"></span>
+                  @if (isPrimaryColor(color.id)) {
+                  <span class="primary-badge">★</span>
+                  }
+                </button>
+                }
+              </div>
+            </div>
+            <div class="color-group">
+              <span class="color-group-label">Otros</span>
+              <div class="color-options">
+                @for (color of getUncommonColors(); track color.id) {
+                <button
+                  type="button"
+                  class="color-option"
+                  [class.selected]="isColorSelected(color.id)"
+                  [class.is-primary]="isPrimaryColor(color.id)"
+                  (click)="selectColor(color)"
+                  [attr.aria-label]="color.name"
+                >
+                  <span class="color-circle" [style.background]="color.hexCode"></span>
+                  @if (isPrimaryColor(color.id)) {
+                  <mat-icon fontIcon="star" class="primary-badge"></mat-icon>
+                  }
+                </button>
+                }
+              </div>
+            </div>
+            @if (selectedColors().length > 0) {
+            <div class="selected-preview">
+              <span class="preview-label">Seleccionados:</span>
+              <div class="preview-colors">
+                @for (colorId of selectedColors(); track colorId) {
+                <div
+                  class="preview-item"
+                  [class.is-primary]="isPrimaryColor(colorId)"
+                  (click)="setPrimaryColor(colorId)"
+                >
+                  <span
+                    class="preview-circle"
+                    [style.background-color]="getColorHex(colorId)"
+                  ></span>
+                  <span class="preview-name">{{ getColorName(colorId) }}</span>
+                  @if (isPrimaryColor(colorId)) {
+                  <mat-icon fontIcon="star" class="primary-star"></mat-icon>
+                  <span class="primary-label">Principal</span>
+                  }
+                </div>
+                }
+              </div>
+              <small class="preview-hint">Toca un color para marcarlo como predominante</small>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Características adicionales</h2>
+        </div>
+        <div class="characteristics-grid">
+          <div class="characteristic-item">
+            <mat-checkbox formControlName="xHasPedigree" class="custom-checkbox">
+              <div class="checkbox-content">
+                <div class="checkbox-text">
+                  <strong>Tiene pedigree</strong>
+                  <span>Certificado de pedigrí</span>
+                </div>
+              </div>
+            </mat-checkbox>
+          </div>
+          <div class="characteristic-item">
+            <mat-checkbox formControlName="xIsNeutered" class="custom-checkbox">
+              <div class="checkbox-content">
+                <div class="checkbox-text">
+                  <strong>Castrado/esterilizado</strong>
+                  <span>¿Ha sido castrado o esterilizado?</span>
+                </div>
+              </div>
+            </mat-checkbox>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Personalidad</h2>
+        </div>
+        <div class="input-group">
+          <h6 class="field-label">Descríbela</h6>
+          <mat-form-field class="mat-field textarea-field">
+            <textarea
+              matInput
+              formControlName="xDescription"
+              rows="6"
+              placeholder="Ej: Es muy juguetón, le encanta correr, tiene una mancha café en la oreja izquierda..."
+            ></textarea>
+            <mat-error>{{ getErrorMessage('xDescription') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Fotos (1-5)</h2>
+        </div>
+        <div class="photo-section">
+          <p class="photo-description">Sube fotos donde se vea bien</p>
+          <input
+            type="file"
+            id="cameraInput"
+            accept="image/*"
+            capture="environment"
+            (change)="onFilesSelected($event)"
+            #cameraInput
+            style="display: none"
+          />
+          <input
+            type="file"
+            id="galleryInput"
+            multiple
+            accept="image/*"
+            (change)="onFilesSelected($event)"
+            #galleryInput
+            style="display: none"
+          />
+          <div class="photo-buttons">
+            <button
+              type="button"
+              class="button large-round vertical"
+              (click)="cameraInput.click()"
+              [disabled]="previewUrls().length >= 5"
+            >
+              <i>photo_camera</i>
+              <span>Tomar Foto</span>
+            </button>
+            <button
+              type="button"
+              class="button large-round vertical"
+              (click)="galleryInput.click()"
+              [disabled]="previewUrls().length >= 5"
+            >
+              <i>photo_library</i>
+              <span>Galería</span>
+            </button>
+          </div>
+          @if (previewUrls().length > 0) {
+          <div class="photo-previews">
+            @for (preview of previewUrls(); track $index) {
+            <div class="photo-preview">
+              <img [src]="preview" [alt]="'Foto ' + ($index + 1)" />
+              <button type="button" class="remove-photo circle" (click)="removeImage($index)">
+                <i>close</i>
+              </button>
+            </div>
+            }
+          </div>
+          <div class="photo-counter">
+            <span>{{ previewUrls().length }} de 5 fotos</span>
+          </div>
+          }
+        </div>
+      </div>
+    </main>
+  </form>
+</section>

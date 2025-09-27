@@ -1,0 +1,40 @@
+:host {
+  display: contents;
+}
+nav.max > header,
+.left.m > header {
+  margin: 1rem 0 1.25rem 0.2rem;
+}
+@media (max-width: 601px) {
+  :is(header, footer, menu > *).fixed {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    background: inherit !important;
+    margin: 0 !important;
+    background-color: var(--surface-container) !important;
+  }
+  .small-padding {
+    h5 {
+      font-size: 1.5rem !important;
+    }
+  }
+}
+
+header {
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+}
+
+.small-padding {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}

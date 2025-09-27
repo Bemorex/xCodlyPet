@@ -1,0 +1,217 @@
+<div class="report-detail-sheet">
+  <div class="sheet-header">
+    <h6>{{ getSheetTitle() }}</h6>
+    <button class="border circle" (click)="close()">
+      <i>close</i>
+    </button>
+  </div>
+
+  <div class="sheet-content">
+    @if (getViewType() === 'report' && report(); as currentReport) {
+
+    <div class="info-section">
+      <div class="section-title">
+        <mat-icon [fontIcon]="currentReport.xReportType === 1 ? 'report' : 'pets'"></mat-icon>
+        <span>
+          @if (currentReport.xReportType === 1) { Mascota Perdida } @else { Mascota Encontrada }
+        </span>
+      </div>
+
+      <div class="status-container">
+        <span
+          class="status-badge"
+          [attr.data-status]="getReportStatusInfo(currentReport.xStatus).color"
+        >
+          {{ getReportStatusInfo(currentReport.xStatus).label }}
+        </span>
+      </div>
+    </div>
+
+    @if (data.pet; as pet) {
+    <div class="info-section">
+      <h6 class="section-subtitle">Mascota</h6>
+      <div class="pet-info">
+        <img
+          [src]="pet.xImage?.[0] || 'https://placehold.co/60x60/E3F2FD/1976D2?text=🐕'"
+          class="pet-image"
+          [alt]="pet.xName"
+        />
+        <div class="pet-details">
+          <strong>{{ pet.xName }}</strong>
+          <span>{{ pet.xType === 1 ? 'Perro' : 'Gato' }} • {{ pet.xColorPrimary }}</span>
+        </div>
+      </div>
+    </div>
+    }
+
+    <div class="info-section">
+      <h6 class="section-subtitle">Detalles del Incidente</h6>
+      <div class="incident-details">
+        <div class="detail-row">
+          <mat-icon>calendar_today</mat-icon>
+          <div>
+            <strong>Fecha y hora</strong>
+            <span
+              >{{ formatDate(currentReport.xIncidentDate) }} a las
+              {{ currentReport.xIncidentTime }}</span
+            >
+          </div>
+        </div>
+
+        <div class="detail-row">
+          <mat-icon>place</mat-icon>
+          <div>
+            <strong>Ubicación</strong>
+            <span>{{ currentReport.xLastSeenLocation }}</span>
+          </div>
+        </div>
+
+        @if (currentReport.xRewardAmount > 0) {
+        <div class="detail-row">
+          <mat-icon>monetization_on</mat-icon>
+          <div>
+            <strong>Recompensa</strong>
+            <span>Bs. {{ currentReport.xRewardAmount }}</span>
+          </div>
+        </div>
+        }
+      </div>
+
+      @if (currentReport.xCircumstancias) {
+      <div class="circumstances">
+        <strong>Circunstancias:</strong>
+        <p>{{ currentReport.xCircumstancias }}</p>
+      </div>
+      }
+    </div>
+
+    @if (currentReport.xLatitude && currentReport.xLongitude) {
+    <div class="info-section">
+      <h6 class="section-subtitle">Ubicación en el Mapa</h6>
+      <div class="compact-map">
+        <google-map
+          height="200px"
+          width="100%"
+          [center]="{ lat: currentReport.xLatitude, lng: currentReport.xLongitude }"
+          [zoom]="15"
+          [options]="mapOptions"
+        >
+          <map-marker
+            [position]="{ lat: currentReport.xLatitude, lng: currentReport.xLongitude }"
+          />
+        </google-map>
+      </div>
+    </div>
+    } @if (currentReport.xImages && currentReport.xImages.length > 0) {
+    <div class="info-section">
+      <h6 class="section-subtitle">Fotos del Lugar</h6>
+      <div class="incident-photos">
+        @for (image of currentReport.xImages; track $index) {
+        <img [src]="image" [alt]="'Foto del incidente ' + ($index + 1)" />
+        }
+      </div>
+    </div>
+    } } @if (getViewType() === 'adoption' || getViewType() === 'contact') { @if (data.pet; as pet) {
+    <div class="info-section">
+      <div class="pet-info large">
+        <img
+          [src]="pet.xImage?.[0] || 'https://placehold.co/80x80/E3F2FD/1976D2?text=🐕'"
+          class="pet-image large"
+          [alt]="pet.xName"
+        />
+        <div class="pet-details">
+          <h5>{{ pet.xName }}</h5>
+          <span>{{ pet.xType === 1 ? 'Perro' : 'Gato' }} • {{ pet.xColorPrimary }}</span>
+          @if (getViewType() === 'adoption') {
+          <div class="adoption-status">
+            <mat-icon>favorite</mat-icon>
+            <span>Disponible para adopción</span>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    } } @if (ownerProfile(); as owner) {
+    <div class="info-section">
+      <h6 class="section-subtitle">
+        @if (isOwner()) { Tu Información de Contacto } @else { Información de Contacto del Dueño }
+      </h6>
+
+      <div class="contact-info">
+        <div class="contact-detail">
+          <mat-icon>person</mat-icon>
+          <div>
+            <strong>Nombre</strong>
+            <span>{{ owner.xName }}</span>
+          </div>
+        </div>
+
+        @if (owner.xPhone) {
+        <div class="contact-detail">
+          <mat-icon>phone</mat-icon>
+          <div>
+            <strong>Teléfono</strong>
+            <span>{{ owner.xPhone }}</span>
+          </div>
+        </div>
+        }
+
+        <div class="contact-detail">
+          <mat-icon>email</mat-icon>
+          <div>
+            <strong>Email</strong>
+            <span>{{ owner.xEmail }}</span>
+          </div>
+        </div>
+
+        @if (owner.xDirection) {
+        <div class="contact-detail">
+          <mat-icon>home</mat-icon>
+          <div>
+            <strong>Dirección</strong>
+            <span>{{ owner.xDirection }}</span>
+          </div>
+        </div>
+        }
+      </div>
+
+      @if (isOwner()) {
+      <div class="action-section">
+        <button class="primary" (click)="markAsResolved()" [disabled]="isLoading()">
+          @if (isLoading()) {
+          <progress class="circle small"></progress>
+          <span>Marcando...</span>
+          } @else {
+          <mat-icon>check_circle</mat-icon>
+          <span>Marcar como Resuelto</span>
+          }
+        </button>
+
+        <button class="tertiary" (click)="shareReportViaWhatsApp()" [disabled]="isLoading()">
+          <mat-icon>share</mat-icon>
+          <span>Compartir por WhatsApp</span>
+        </button>
+      </div>
+      } @else {
+      <div class="action-section">
+        <button class="tertiary" (click)="shareReportViaWhatsApp()">
+          <mat-icon>share</mat-icon>
+          <span>Ayudar a Compartir</span>
+        </button>
+      </div>
+      }
+    </div>
+    }
+
+    <div class="help-message">
+      <mat-icon>info</mat-icon>
+      <p>
+        @if (isOwner()) { Esta es tu información de contacto que otros usuarios verán cuando
+        necesiten comunicarse contigo. } @else { @if (getViewType() === 'adoption') { Si estás
+        interesado en adoptar a {{ data.pet?.xName }}, contacta al dueño para coordinar una visita y
+        conocer más detalles. } @else { Si has visto a {{ data.pet?.xName }} o tienes información
+        útil, contacta al dueño inmediatamente. Cualquier ayuda es valiosa. } }
+      </p>
+    </div>
+  </div>
+</div>

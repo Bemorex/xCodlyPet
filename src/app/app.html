@@ -1,0 +1,8 @@
+@if (authService.loading() || authService.redirectInProgress()) {
+<main class="responsive center-align loading-container">
+  <progress class="circle large primary"></progress>
+  <h6 class="secondary-text">Cargando aplicación...</h6>
+</main>
+} @else {
+<router-outlet></router-outlet>
+}

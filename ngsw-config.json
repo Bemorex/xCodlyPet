@@ -1,0 +1,87 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "appData": {
+    "name": "Codly",
+    "description": "Plataforma para registrar mascotas y reportar mascotas perdidas",
+    "version": "1.0.0"
+  },
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "resources": {
+        "files": [
+          "/favicon.ico",
+          "/index.csr.html",
+          "/index.html",
+          "/manifest.webmanifest",
+          "/*.css",
+          "/*.js"
+        ]
+      }
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/**",
+          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2|ico)"
+        ]
+      }
+    },
+    {
+      "name": "fonts",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": ["/fonts/**"]
+      }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "pet-images",
+      "urls": ["https://firebasestorage.googleapis.com/v0/b/xcodlypet.appspot.com/**"],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 100,
+        "maxAge": "1d",
+        "timeout": "10s"
+      }
+    },
+    {
+      "name": "api-freshness",
+      "urls": ["https://firebaseapp.googleapis.com/**", "https://xcodlypet.firebaseio.com/**"],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 50,
+        "maxAge": "5m",
+        "timeout": "5s"
+      }
+    },
+    {
+      "name": "api-performance",
+      "urls": ["https://maps.googleapis.com/maps/api/**"],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 20,
+        "maxAge": "1h",
+        "timeout": "5s"
+      }
+    },
+    {
+      "name": "external-images",
+      "urls": ["https://images.unsplash.com/**", "https://placehold.co/**"],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": "1d",
+        "timeout": "10s"
+      }
+    }
+  ],
+  "navigationUrls": ["/**", "!/**/*.*", "!/**/*__*", "!/**/*__*/**"]
+}

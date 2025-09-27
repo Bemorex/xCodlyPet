@@ -1,0 +1,29 @@
+<main class="center-align">
+  <div class="container">
+    <img src="brand/logo-letter-vertical.svg" class="responsive" alt="[Imagen de bienvenida]" />
+    <h3 class="primary-text">¡Nunca pierdas a tu mejor amigo!</h3>
+
+    <p>
+      @if (!authService.isAuthenticated()) { Inicia sesión con tu cuenta de Google para comenzar. }
+      @else { Ya has iniciado sesión. ¡Vamos a tu panel! }
+    </p>
+    <div class="space"></div>
+    <div class="space"></div>
+    <button
+      class="responsive large-round primary"
+      (click)="handleAuthAction()"
+      [disabled]="isLoading()"
+    >
+      @if (isLoading()) {
+      <progress class="circle small white"></progress>
+      <span>Procesando...</span>
+      } @else { @if (authService.isAuthenticated()) {
+      <i>pets</i>
+      <span>Ingresar</span>
+      } @else {
+      <i>login</i>
+      <span>Ingresar con Google</span>
+      } }
+    </button>
+  </div>
+</main>

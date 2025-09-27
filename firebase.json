@@ -1,0 +1,31 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "dist/xpet/browser",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/manifest.webmanifest",
+        "headers": [{ "key": "Content-Type", "value": "application/manifest+json" }]
+      },
+      {
+        "source": "/sitemap.xml",
+        "headers": [{ "key": "Content-Type", "value": "application/xml" }]
+      }
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

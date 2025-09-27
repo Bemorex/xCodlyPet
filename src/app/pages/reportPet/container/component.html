@@ -1,0 +1,267 @@
+<section class="layout">
+  <form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
+    <x-navbar xTitle="Reportar" backUrl="/pets" [xActions]="xActions" />
+    <ng-template #xActions>
+      @if (uploadProgress() > 0) {
+      <span class="progress-percent">{{ uploadProgress() }}%</span>
+      }
+      <button type="submit" [disabled]="reportForm.invalid || !selectedLocation() || isLoading()">
+        @if (isLoading()) { Guardando... } @else { Guardar }
+      </button>
+    </ng-template>
+
+    <main class="pet-registration">
+      <div class="hero-section">
+        <div class="hero-content">
+          <mat-icon fontIcon="report"></mat-icon>
+          <h1 class="hero-title">Reportar Mascota Perdida</h1>
+          <p class="hero-subtitle">
+            Completa la información para ayudarnos a encontrar a tu mascota
+          </p>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Mascota a reportar</h2>
+        </div>
+
+        <div class="selected-pet">
+          <img
+            [src]="
+              preSelectedPet()?.xImage?.[0] || 'https://placehold.co/60x60/E3F2FD/1976D2?text=🐕'
+            "
+            class="selected-pet-image"
+          />
+          <div class="selected-pet-info">
+            <h6>{{ preSelectedPet()?.xName }}</h6>
+            <p>
+              {{ preSelectedPet()?.xType === 1 ? 'Perro' : 'Gato' }} •
+              {{ preSelectedPet()?.xColorPrimary }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">¿Cuándo se perdió?</h2>
+        </div>
+
+        <div class="input-group">
+          <h6 class="field-label">Fecha del incidente</h6>
+          <mat-form-field class="mat-field">
+            <input
+              matInput
+              [matDatepicker]="datePicker"
+              formControlName="xIncidentDate"
+              [max]="maxDate"
+            />
+            <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+            <mat-datepicker touchUi #datePicker startView="month"></mat-datepicker>
+            @if (reportForm.get('xIncidentDate')?.invalid &&
+            reportForm.get('xIncidentDate')?.touched) {
+            <mat-error>{{ getErrorMessage('xIncidentDate') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="input-group">
+          <h6 class="field-label">Hora aproximada</h6>
+          <mat-form-field class="mat-field">
+            <input matInput [matTimepicker]="timePicker" formControlName="xIncidentTime" />
+            <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+            <mat-timepicker #timePicker />
+            @if (reportForm.get('xIncidentTime')?.invalid &&
+            reportForm.get('xIncidentTime')?.touched) {
+            <mat-error>{{ getErrorMessage('xIncidentTime') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Recompensa (opcional)</h2>
+        </div>
+
+        <div class="input-group">
+          <h6 class="field-label">¿Ofreces alguna recompensa?</h6>
+          <mat-form-field class="mat-field">
+            <span matTextPrefix>Bs.&nbsp;</span>
+            <input matInput type="number" formControlName="xRewardAmount" placeholder="0" min="0" />
+            @if (reportForm.get('xRewardAmount')?.invalid &&
+            reportForm.get('xRewardAmount')?.touched) {
+            <mat-error>{{ getErrorMessage('xRewardAmount') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">¿Dónde se perdió?</h2>
+        </div>
+
+        @if (selectedLocation(); as location) {
+        <div class="selected-location-info">
+          <div class="location-header">
+            <mat-icon>place</mat-icon>
+            <span class="location-text">Ubicación seleccionada</span>
+          </div>
+          <p class="location-address">{{ location.address }}</p>
+          <small class="location-coords">
+            Coordenadas: {{ location.latitude.toFixed(6) }}, {{ location.longitude.toFixed(6) }}
+          </small>
+        </div>
+        }
+
+        <div class="location-actions">
+          <button
+            type="button"
+            class="button large-round"
+            (click)="getCurrentLocation()"
+            [disabled]="locationService.isLoading()"
+          >
+            @if (locationService.isLoading()) {
+            <progress class="circle small"></progress>
+            <span>Obteniendo ubicación...</span>
+            } @else {
+            <i>my_location</i>
+            <span>Usar Ubicación Actual</span>
+            }
+          </button>
+        </div>
+
+        <div class="map-wrapper">
+          <google-map
+            height="350px"
+            width="100%"
+            [center]="locationService.center()"
+            [zoom]="locationService.zoom()"
+            [options]="mapOptions"
+            (mapInitialized)="onMapReady($event)"
+            (mapClick)="onMapClick($event)"
+          >
+          </google-map>
+
+          @if (!selectedLocation()) {
+          <div class="no-location">
+            <p>Toca en el mapa para seleccionar la ubicación</p>
+            <small>O usa el botón "Usar Ubicación Actual"</small>
+          </div>
+          }
+        </div>
+
+        <div class="input-group">
+          <h6 class="field-label">Describe el lugar exacto</h6>
+          <mat-form-field class="mat-field textarea-field">
+            <textarea
+              matInput
+              formControlName="xLastSeenLocation"
+              rows="3"
+              placeholder="Ej: Frente al parque central, cerca de la farmacia San José..."
+            ></textarea>
+            @if (reportForm.get('xLastSeenLocation')?.invalid &&
+            reportForm.get('xLastSeenLocation')?.touched) {
+            <mat-error>{{ getErrorMessage('xLastSeenLocation') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Circunstancias (opcional)</h2>
+        </div>
+
+        <div class="input-group">
+          <h6 class="field-label">¿Cómo ocurrió?</h6>
+          <mat-form-field class="mat-field textarea-field">
+            <textarea
+              matInput
+              formControlName="xCircumstances"
+              rows="6"
+              placeholder="Describe detalladamente cómo se perdió tu mascota, qué estaba haciendo, si había alguna distracción, etc."
+            ></textarea>
+            @if (reportForm.get('xCircumstances')?.invalid &&
+            reportForm.get('xCircumstances')?.touched) {
+            <mat-error>{{ getErrorMessage('xCircumstances') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">Fotos del lugar (opcional)</h2>
+        </div>
+
+        <div class="photo-section">
+          <p class="photo-description">
+            Sube fotos del lugar donde ocurrió el incidente para ayudar a identificarlo mejor
+          </p>
+
+          <input
+            type="file"
+            id="cameraInput"
+            accept="image/*"
+            capture="environment"
+            (change)="onFilesSelected($event)"
+            #cameraInput
+            style="display: none"
+          />
+
+          <input
+            type="file"
+            id="galleryInput"
+            multiple
+            accept="image/*"
+            (change)="onFilesSelected($event)"
+            #galleryInput
+            style="display: none"
+          />
+
+          <div class="photo-buttons">
+            <button
+              type="button"
+              class="button large-round vertical"
+              (click)="cameraInput.click()"
+              [disabled]="previewUrls().length >= 3"
+            >
+              <i>photo_camera</i>
+              <span>Tomar Foto</span>
+            </button>
+
+            <button
+              type="button"
+              class="button large-round vertical"
+              (click)="galleryInput.click()"
+              [disabled]="previewUrls().length >= 3"
+            >
+              <i>photo_library</i>
+              <span>Galería</span>
+            </button>
+          </div>
+
+          @if (previewUrls().length > 0) {
+          <div class="photo-previews">
+            @for (preview of previewUrls(); track $index) {
+            <div class="photo-preview">
+              <img [src]="preview" [alt]="'Foto del lugar ' + ($index + 1)" />
+              <button type="button" class="remove-photo circle" (click)="removeImage($index)">
+                <i>close</i>
+              </button>
+            </div>
+            }
+          </div>
+
+          <div class="photo-counter">
+            <span>{{ previewUrls().length }} de 3 fotos</span>
+          </div>
+          }
+        </div>
+      </div>
+    </main>
+  </form>
+</section>

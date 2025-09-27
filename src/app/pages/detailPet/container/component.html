@@ -1,0 +1,361 @@
+<x-navbar
+  [xTitle]="pet()?.xName || 'Cargando...'"
+  backUrl="/pets"
+  [xSmall]="false"
+  [xActions]="xActions"
+></x-navbar>
+
+<ng-template #xActions>
+  <span class="status-badge" [attr.data-status]="getStatusInfo(pet()?.xCurrentStatus).color">
+    {{ getStatusInfo(pet()?.xCurrentStatus).label }}
+  </span>
+
+  @if (isOwner()) {
+  <button class="square round fill" (click)="editPet()">
+    <i>edit</i>
+  </button>
+  }
+</ng-template>
+
+<section class="layout">
+  <main class="pet-detail-container">
+    @if (pet(); as currentPet) {
+
+    <div class="hero-section">
+      <div class="hero-content">
+        <mat-icon fontIcon="pets"></mat-icon>
+        <h1 class="hero-title">{{ currentPet.xName }}</h1>
+        <p class="hero-subtitle">
+          {{ getPetTypeLabel(currentPet.xType) }} • {{ getBreedLabel(currentPet.xBreed) }}
+        </p>
+      </div>
+    </div>
+
+    @if (currentPet.xImage && currentPet.xImage.length > 0) {
+    <div class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Galería de Fotos</h2>
+      </div>
+
+      <div class="main-image-container" (click)="openImageGallery(0)">
+        <img [src]="currentPet.xImage[0]" [alt]="currentPet.xName" class="main-image" />
+        <div class="image-overlay">
+          <mat-icon>zoom_in</mat-icon>
+          <span>Ver galería ({{ currentPet.xImage.length }})</span>
+        </div>
+      </div>
+
+      @if (currentPet.xImage.length > 1) {
+      <div class="thumbnails-grid">
+        @for (image of currentPet.xImage; track $index) {
+        <div
+          class="thumbnail-item"
+          [class.active]="$index === 0"
+          (click)="openImageGallery($index)"
+        >
+          <img [src]="image" [alt]="currentPet.xName + ' foto ' + ($index + 1)" />
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+
+    <div class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Información Básica</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Edad</span>
+          <span class="info-value">
+            {{ calculateAgeFromBirthDate(currentPet.xBirthDate) }} años ({{
+              getAgeStage(currentPet.xBirthDate)
+            }})
+          </span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Sexo</span>
+          <span class="info-value">{{ getGenderLabel(currentPet.xGender) }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Raza</span>
+          <span class="info-value">{{ getBreedLabel(currentPet.xBreed) }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Tipo de pelo</span>
+          <span class="info-value">{{ getFurTypeLabel(currentPet.xFurType) }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Color principal</span>
+          <span class="info-value">{{ currentPet.xColorPrimary }}</span>
+        </div>
+
+        @if (currentPet.xColorSecondary && currentPet.xColorSecondary.length > 0) {
+        <div class="info-item">
+          <span class="info-label">Colores secundarios</span>
+          <span class="info-value">{{ currentPet.xColorSecondary.join(', ') }}</span>
+        </div>
+        } @if (currentPet.xCreatedAt) {
+        <div class="info-item">
+          <span class="info-label">Registrado</span>
+          <span class="info-value">{{ formatDate(currentPet.xCreatedAt) }}</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Características</h2>
+      </div>
+
+      <div class="characteristics-list">
+        <div class="characteristic-chip" [class.active]="currentPet.xHasPedigree">
+          <mat-icon>{{ currentPet.xHasPedigree ? 'check_circle' : 'cancel' }}</mat-icon>
+          <span>{{ currentPet.xHasPedigree ? 'Tiene' : 'No tiene' }} pedigree</span>
+        </div>
+
+        <div class="characteristic-chip" [class.active]="currentPet.xIsNeutered">
+          <mat-icon>{{ currentPet.xIsNeutered ? 'check_circle' : 'cancel' }}</mat-icon>
+          <span>{{ currentPet.xIsNeutered ? 'Esterilizado' : 'No esterilizado' }}</span>
+        </div>
+
+        @if (currentPet.xIsDeceased) {
+        <div class="characteristic-chip warn">
+          <mat-icon>sentiment_very_dissatisfied</mat-icon>
+          <span>Fallecido</span>
+        </div>
+        }
+      </div>
+    </div>
+
+    @if (getBreedInfo(currentPet.xBreed); as breedInfo) {
+    <div class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Información de Raza</h2>
+      </div>
+
+      <div class="breed-info-card">
+        <div class="breed-header">
+          <img [src]="breedInfo.image" [alt]="breedInfo.nameEs" class="breed-image" />
+          <div class="breed-details">
+            <h6>{{ breedInfo.nameEs }}</h6>
+            <p class="breed-description">{{ breedInfo.characteristics.join(' • ') }}</p>
+          </div>
+        </div>
+
+        <div class="breed-temperament">
+          <strong>Temperamento típico:</strong>
+          <div class="temperament-chips">
+            @for (trait of breedInfo.temperament; track trait) {
+            <span class="temperament-chip">{{ trait }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <div class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">Descripción y Personalidad</h2>
+      </div>
+      <p class="description-text">{{ currentPet.xDescription }}</p>
+    </div>
+
+    @if (ownerProfile(); as owner) {
+    <div class="form-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          @if (isOwner()) { Tu Información de Contacto } @else { Información del Dueño }
+        </h2>
+      </div>
+
+      <div class="owner-contact-info">
+        <div class="owner-profile-header">
+          @if (owner.xPhoto) {
+          <img [src]="owner.xPhoto" [alt]="owner.xName" class="owner-avatar" />
+          } @else {
+          <div class="owner-avatar-placeholder">
+            <mat-icon>person</mat-icon>
+          </div>
+          }
+          <div class="owner-basic-info">
+            <h5>{{ owner.xName }}</h5>
+            <span class="owner-role">
+              @if (isOwner()) { Tu perfil } @else { Dueño de {{ currentPet.xName }}
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="contact-details">
+          @if (owner.xPhone) {
+          <div class="contact-detail">
+            <mat-icon>phone</mat-icon>
+            <div>
+              <strong>Teléfono</strong>
+              <span>{{ owner.xPhone }}</span>
+            </div>
+          </div>
+          }
+
+          <div class="contact-detail">
+            <mat-icon>email</mat-icon>
+            <div>
+              <strong>Email</strong>
+              <span>{{ owner.xEmail }}</span>
+            </div>
+          </div>
+
+          @if (owner.xDirection) {
+          <div class="contact-detail">
+            <mat-icon>home</mat-icon>
+            <div>
+              <strong>Dirección</strong>
+              <span>{{ owner.xDirection }}</span>
+            </div>
+          </div>
+          }
+        </div>
+
+        @if (!isOwner()) {
+        <div class="contact-actions-section">
+          <div class="contact-actions">
+            @if (owner.xPhone) {
+            <button class="button primary large-round" (click)="contactViaWhatsApp()">
+              <mat-icon>message</mat-icon>
+              <span>WhatsApp</span>
+            </button>
+            }
+
+            <button class="button secondary large-round" (click)="contactViaEmail()">
+              <mat-icon>email</mat-icon>
+              <span>Email</span>
+            </button>
+
+            @if (owner.xPhone) {
+            <button class="button tertiary large-round" (click)="callDirectly()">
+              <mat-icon>phone</mat-icon>
+              <span>Llamar</span>
+            </button>
+            }
+          </div>
+
+          <div class="contact-help-message">
+            <mat-icon>info</mat-icon>
+            <p>
+              @if (currentPet.xCurrentStatus === 4) { Si estás interesado en adoptar a
+              {{ currentPet.xName }}, contacta al dueño para coordinar una visita y conocer más
+              detalles sobre el proceso. } @else if (currentPet.xCurrentStatus === 2) { Si has visto
+              a {{ currentPet.xName }} o tienes información útil, contacta al dueño inmediatamente.
+              } @else { Contacta al dueño si necesitas más información sobre {{ currentPet.xName }}.
+              }
+            </p>
+          </div>
+        </div>
+        } @else {
+        <div class="owner-info-message">
+          <mat-icon>info</mat-icon>
+          <p>
+            Esta es tu información de contacto que otros usuarios verán cuando necesiten comunicarse
+            contigo sobre {{ currentPet.xName }}.
+          </p>
+        </div>
+        }
+      </div>
+    </div>
+    } } @else {
+    <div class="loading-container">
+      <progress class="circle large primary"></progress>
+      <h6 class="secondary-text">Cargando información de la mascota...</h6>
+    </div>
+    }
+  </main>
+</section>
+
+@if (pet(); as currentPet) {
+<nav class="center-align tiny-space bottom">
+  <nav class="group connected">
+    @if (isOwner()) { @if (currentPet.xCurrentStatus === 1) {
+    <button class="no-round active" (click)="markForAdoption()">
+      <i>favorite</i>
+      <span>Ofrecer en adopción</span>
+    </button>
+    <button class="error-container" [routerLink]="['/reports/create', pet()?.xId]">
+      <i>report</i>
+      <span>Reportar perdida</span>
+    </button>
+    } @else if (currentPet.xCurrentStatus === 2) {
+    <button class="no-round" (click)="viewActiveReport()">
+      <i>visibility</i>
+      <span>Ver Reporte</span>
+    </button>
+    <button class="active" (click)="markAsSafe()" [disabled]="isLoading()">
+      <i>home</i>
+      <span>Marcar en Casa</span>
+    </button>
+    } @else if (currentPet.xCurrentStatus === 4) {
+    <button class="no-round active" (click)="revertFromAdoption()" [disabled]="isLoading()">
+      <i>undo</i>
+      <span>Revertir Adopción</span>
+    </button>
+    } } @else { @if (currentPet.xCurrentStatus === 2) {
+    <button class="no-round active" (click)="viewActiveReport()">
+      <i>visibility</i>
+      <span>Ver Reporte de Pérdida</span>
+    </button>
+    } @else if (currentPet.xCurrentStatus === 4) {
+    <button class="no-round primary" (click)="showAdoptionInterest()">
+      <i>favorite</i>
+      <span>Me Interesa Adoptar</span>
+    </button>
+    } }
+  </nav>
+</nav>
+} @if (showImageGallery() && pet()?.xImage) {
+<div class="image-gallery-modal" (click)="closeImageGallery()">
+  <div class="gallery-content" (click)="$event.stopPropagation()">
+    <div class="gallery-header">
+      <h6>
+        {{ pet()?.xName }} - Foto {{ selectedImageIndex() + 1 }} de {{ pet()?.xImage?.length }}
+      </h6>
+      <button mat-icon-button (click)="closeImageGallery()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="gallery-image">
+      <img [src]="pet()?.xImage?.[selectedImageIndex()]" [alt]="pet()?.xName" />
+    </div>
+
+    @if (pet()?.xImage && (pet()?.xImage?.length || 0) > 1) {
+    <div class="gallery-controls">
+      <button mat-fab (click)="previousImage()" class="nav-btn prev-btn">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <button mat-fab (click)="nextImage()" class="nav-btn next-btn">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+    } @if (pet()?.xImage && (pet()?.xImage?.length || 0) > 1) {
+    <div class="gallery-indicators">
+      @for (image of pet()?.xImage; track $index) {
+      <div
+        class="indicator"
+        [class.active]="$index === selectedImageIndex()"
+        (click)="selectedImageIndex.set($index)"
+      ></div>
+      }
+    </div>
+    }
+  </div>
+</div>
+}

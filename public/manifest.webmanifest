@@ -1,0 +1,139 @@
+{
+  "name": "Codly - Encuentra y registra mascotas perdidas",
+  "short_name": "Codly",
+  "description": "Plataforma para registrar mascotas y reportar cuando se pierden. Ayuda a encontrar mascotas perdidas en tu comunidad.",
+  "theme_color": "#f38c06",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "orientation": "portrait",
+  "lang": "es",
+  "categories": ["lifestyle", "utilities", "social"],
+  "icons": [
+    {
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/5.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Reporta a tus mascotas perdidas"
+    },
+    {
+      "src": "screenshots/6.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Registra a tus mascotas"
+    },
+    {
+      "src": "screenshots/7.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Adopta una mascota"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mis Mascotas",
+      "short_name": "Mascotas",
+      "description": "Ver mis mascotas registradas",
+      "url": "/pets",
+      "icons": [
+        {
+          "src": "icons/shortcut-pets.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Reportar Perdida",
+      "short_name": "Reportar",
+      "description": "Reportar mascota perdida",
+      "url": "/reports/create",
+      "icons": [
+        {
+          "src": "icons/shortcut-report.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Mascotas Perdidas",
+      "short_name": "Perdidas",
+      "description": "Ver mascotas perdidas",
+      "url": "/reports",
+      "icons": [
+        {
+          "src": "icons/shortcut-lost.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/reports/create",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+codly",
+      "url": "/?handler=%s"
+    }
+  ]
+}
