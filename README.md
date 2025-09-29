@@ -26,11 +26,6 @@
 
 ## 👥 Información del Proyecto
 
-### Autores
-
-- **David Morales Vega**
-- **Andrea Megan Lafuente Rocha**
-
 ### Datos del Concurso
 
 - **Organizador**: CITI (Centro de Investigación en Tecnología e Innovación)
@@ -478,7 +473,7 @@ Codly Pet no es solo una aplicación, es el inicio de una revolución en el cuid
 
 ---
 
-**Desarrollado con ❤️ por Andrea Megan Lafuente Rocha y David Morales Vega**
+**Desarrollado con ❤️**
 
 - **Repositorio**: [GitHub - Codly Pet](https://github.com/Bemorex/xCodlyPet)
 - **Demo en vivo**: https://codly.pet
